@@ -177,7 +177,7 @@ class ClassNameCheck(BaseASTCheck):
     Classes for internal use have a leading underscore in addition.
     """
     check = CLASS_REGEX.match
-    N801 = "class names should use CapWords convention"
+    N801 = "class names should use UpperCamelCase convention"
 
     def visit_classdef(self, node, parents, ignore=None):
         if not self.check(node.name):
@@ -195,7 +195,7 @@ class FunctionNameCheck(BaseASTCheck):
     """
     check = METHODS_REGEX.match
     check2 = SPECIAL_METHOD_REGEX.match
-    N802 = "function name should be lowercamelcase or __lowercase__"
+    N802 = "function name should be lowerCamelCase or __lowercase__"
 
     def visit_functiondef(self, node, parents, ignore=None):
         name = node.name
@@ -215,7 +215,7 @@ class FunctionArgNamesCheck(BaseASTCheck):
     A method should have 'self' as first argument.
     """
     check = LOWERCAMELCASE_REGEX.match
-    N803 = "argument name should be lowercamelcase"
+    N803 = "argument name should be lowerCamelCase"
     N804 = "first argument of a classmethod should be named 'cls'"
     N805 = "first argument of a method should be named 'self'"
 
@@ -263,9 +263,9 @@ class ImportAsCheck(BaseASTCheck):
     check_meth = METHODS_REGEX.match
     check_class = CLASS_REGEX.match
 
-    N811 = "constant case imported as non constant case"
-    N812 = "lower camel case imported as non lower camel case"
-    N813 = "function imported as non function"
+    N811 = "CONSTANT_CASE imported as non CONSTANT_CASE"
+    N812 = "lowerCamelCase imported as non lowerCamelCase"
+    N813 = "lowerCamelCase imported as non lowerCamelCasen"
     N814 = "Upper camel case imported as non upper camel case"
 
     def visit_importfrom(self, node, parents, ignore=None):
@@ -292,7 +292,7 @@ class VariablesInFunctionCheck(BaseASTCheck):
     Local variables in functions should be lowercamelcase
     """
     check = LOWERCAMELCASE_REGEX.match
-    N806 = "variable in function should be lowercamelcase"
+    N806 = "variable in function should be lowerCamelCase"
 
     def visit_assign(self, node, parents, ignore=None):
         for parent_func in reversed(parents):
