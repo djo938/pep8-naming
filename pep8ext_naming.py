@@ -11,7 +11,7 @@ try:
 except ImportError:
     from flake8.util import ast, iter_child_nodes
 
-__version__ = '0.3.3'
+__version__ = '0.4.0'
 
 WORDCASE = r'([A-Z][A-Z]?[a-z0-9]+)'
 LOWERCAMELCASE = r'_?[a-z]+[0-9]*'+WORDCASE+'*'
