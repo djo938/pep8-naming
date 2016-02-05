@@ -6,7 +6,9 @@ from mod import good as nice, NICE as GOOD, Camel as Memel
 from mod import GOOD as bad
 #: N812
 from mod import good as Bad
-#: N813
+#: N814
 from mod import CamelCase as noncamle
 #: N814
 from mod import CamelCase as CONSTANT
+#: N812
+from mod import camelCase as CamelCase

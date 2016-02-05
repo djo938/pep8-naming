@@ -7,31 +7,31 @@ def __bad():
 #: N802
 def bad__():
     pass
-#: N802
+#: Okay
 def __bad__():
     pass
 #: Okay
 def _ok():
     pass
-#: Okay
+#: N802
 def ok_ok_ok_ok():
     pass
-#: Okay
+#: N802
 def _somehow_good():
     pass
-#: Okay
+#: N802
 def go_od_():
     pass
-#: Okay
+#: N802
 def _go_od_():
     pass
 #: N802
 def NotOK():
     pass
-#: Okay
+#: N802
 def _():
     pass
-#: Okay
+#: N802
 class Foo(object):
     def __method(self):
         pass
@@ -43,7 +43,7 @@ class Foo(object):
 class ClassName(object):
     def __method__(self):
         pass
-#: N802
+#: Okay
 class ClassName(object):
     def notOk(self):
         pass

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Checker of PEP-8 Naming Conventions."""
+
 import re
 import sys
 from collections import deque
@@ -12,9 +13,22 @@ except ImportError:
 
 __version__ = '0.3.3'
 
-LOWERCASE_REGEX = re.compile(r'[_a-z][_a-z0-9]*$')
-UPPERCASE_REGEX = re.compile(r'[_A-Z][_A-Z0-9]*$')
-MIXEDCASE_REGEX = re.compile(r'_?[A-Z][a-zA-Z0-9]*$')
+WORDCASE = r'([A-Z][A-Z]?[a-z0-9]+)'
+LOWERCAMELCASE = r'_?[a-z]+[0-9]*'+WORDCASE+'*'
+
+# method + special method __main__, __not_zero__
+METHODS_REGEX = re.compile(LOWERCAMELCASE+r'$')
+SPECIAL_METHOD_REGEX = re.compile(r'__[a-z]+__$')
+
+# variable, argument
+LOWERCAMELCASE_REGEX = re.compile(LOWERCAMELCASE+r'$')
+
+# constant
+CONSTANT_REGEX = re.compile(r'[_A-Z]([A-Z0-9]+_?)*[A-Z0-9]+$')
+
+# class
+CLASS_REGEX = re.compile(r'_?'+WORDCASE+'+$')
+
 SPLIT_IGNORED_RE = re.compile(r'[,\s]')
 
 
@@ -62,7 +76,7 @@ class NamingChecker(object):
     """Checker of PEP-8 Naming Conventions."""
     name = 'naming'
     version = __version__
-    ignore_names = ['setUp', 'tearDown', 'setUpClass', 'tearDownClass']
+    ignore_names = []
 
     def __init__(self, tree, filename):
         self.visitors = BaseASTCheck._checks
@@ -162,7 +176,7 @@ class ClassNameCheck(BaseASTCheck):
 
     Classes for internal use have a leading underscore in addition.
     """
-    check = MIXEDCASE_REGEX.match
+    check = CLASS_REGEX.match
     N801 = "class names should use CapWords convention"
 
     def visit_classdef(self, node, parents, ignore=None):
@@ -172,36 +186,36 @@ class ClassNameCheck(BaseASTCheck):
 
 class FunctionNameCheck(BaseASTCheck):
     """
-    Function names should be lowercase, with words separated by underscores
-    as necessary to improve readability.
+    Function names should be lowercamelcase, with words separated by
+    underscores as necessary to improve readability.
     Functions *not* beeing methods '__' in front and back are not allowed.
 
     mixedCase is allowed only in contexts where that's already the
     prevailing style (e.g. threading.py), to retain backwards compatibility.
     """
-    check = LOWERCASE_REGEX.match
-    N802 = "function name should be lowercase"
+    check = METHODS_REGEX.match
+    check2 = SPECIAL_METHOD_REGEX.match
+    N802 = "function name should be lowercamelcase or __lowercase__"
 
     def visit_functiondef(self, node, parents, ignore=None):
-        function_type = getattr(node, 'function_type', 'function')
         name = node.name
         if ignore and name in ignore:
             return
-        if ((function_type == 'function' and '__' in (name[:2], name[-2:])) or
-                not self.check(name)):
+
+        if not self.check(name) and not self.check2(name):
             yield self.err(node, 'N802')
 
 
 class FunctionArgNamesCheck(BaseASTCheck):
     """
-    The argument names of a function should be lowercase, with words separated
-    by underscores.
+    The argument names of a function should be lowercamelcase, with words
+    separated by underscores.
 
     A classmethod should have 'cls' as first argument.
     A method should have 'self' as first argument.
     """
-    check = LOWERCASE_REGEX.match
-    N803 = "argument name should be lowercase"
+    check = LOWERCAMELCASE_REGEX.match
+    N803 = "argument name should be lowercamelcase"
     N804 = "first argument of a classmethod should be named 'cls'"
     N805 = "first argument of a method should be named 'self'"
 
@@ -243,35 +257,42 @@ class ImportAsCheck(BaseASTCheck):
     """
     Don't change the naming convention via an import
     """
-    check_lower = LOWERCASE_REGEX.match
-    check_upper = UPPERCASE_REGEX.match
-    N811 = "constant imported as non constant"
-    N812 = "lowercase imported as non lowercase"
-    N813 = "camelcase imported as lowercase"
-    N814 = "camelcase imported as constant"
+
+    check_const = CONSTANT_REGEX.match
+    check_var = LOWERCAMELCASE_REGEX.match
+    check_meth = METHODS_REGEX.match
+    check_class = CLASS_REGEX.match
+
+    N811 = "constant case imported as non constant case"
+    N812 = "lower camel case imported as non lower camel case"
+    N813 = "function imported as non function"
+    N814 = "Upper camel case imported as non upper camel case"
 
     def visit_importfrom(self, node, parents, ignore=None):
         for name in node.names:
             if not name.asname:
                 continue
-            if self.check_upper(name.name):
-                if not self.check_upper(name.asname):
+
+            if self.check_const(name.name):
+                if not self.check_const(name.asname):
                     yield self.err(node, 'N811')
-            elif self.check_lower(name.name):
-                if not self.check_lower(name.asname):
+            elif self.check_var(name.name):
+                if not self.check_var(name.asname):
                     yield self.err(node, 'N812')
-            elif self.check_lower(name.asname):
-                yield self.err(node, 'N813')
-            elif self.check_upper(name.asname):
-                yield self.err(node, 'N814')
+            elif self.check_meth(name.name):
+                if not self.check_meth(name.asname):
+                    yield self.err(node, 'N813')
+            elif self.check_class(name.name):
+                if not self.check_class(name.asname):
+                    yield self.err(node, 'N814')
 
 
 class VariablesInFunctionCheck(BaseASTCheck):
     """
-    Local variables in functions should be lowercase
+    Local variables in functions should be lowercamelcase
     """
-    check = LOWERCASE_REGEX.match
-    N806 = "variable in function should be lowercase"
+    check = LOWERCAMELCASE_REGEX.match
+    N806 = "variable in function should be lowercamelcase"
 
     def visit_assign(self, node, parents, ignore=None):
         for parent_func in reversed(parents):
@@ -285,7 +306,7 @@ class VariablesInFunctionCheck(BaseASTCheck):
             name = isinstance(target, ast.Name) and target.id
             if not name or name in parent_func.global_names:
                 return
-            if not self.check(name) and name[:1] != '_':
+            if not self.check(name):
                 if isinstance(node.value, ast.Call):
                     if isinstance(node.value.func, ast.Attribute):
                         if node.value.func.attr == 'namedtuple':
@@ -293,4 +314,5 @@ class VariablesInFunctionCheck(BaseASTCheck):
                     elif isinstance(node.value.func, ast.Name):
                         if node.value.func.id == 'namedtuple':
                             return
+
                 yield self.err(target, 'N806')

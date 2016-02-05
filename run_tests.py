@@ -1,7 +1,10 @@
-import sys
+# -*- coding: utf-8 -*-
+
 import os
-import pep8ext_naming
 import re
+import sys
+
+import pep8ext_naming
 
 PyCF_ONLY_AST = 1024
 
