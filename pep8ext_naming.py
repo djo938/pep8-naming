@@ -14,7 +14,7 @@ except ImportError:
 __version__ = '0.4.0'
 
 WORDCASE = r'([A-Z][A-Z]?[a-z0-9]+)'
-LOWERCAMELCASE = r'_?[a-z]+[0-9]*'+WORDCASE+'*'
+LOWERCAMELCASE = r'_?[a-z]+[0-9a-z]*'+WORDCASE+'*'
 
 # method + special method __main__, __not_zero__
 METHODS_REGEX = re.compile(LOWERCAMELCASE+r'$')
