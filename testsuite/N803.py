@@ -48,6 +48,6 @@ class Test(object):
     @classmethod
     def test(cls, BAD):
         pass
-#: Okay
+#: N803
 def b14(bAd):
     pass

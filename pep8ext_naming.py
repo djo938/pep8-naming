@@ -14,17 +14,19 @@ except ImportError:
 __version__ = '0.4.0'
 
 WORDCASE = r'([A-Z][A-Z]?[a-z0-9]+)'
-LOWERCAMELCASE = r'_?[a-z]+[0-9a-z]*'+WORDCASE+'*'
 
 # method + special method __main__, __not_zero__
-METHODS_REGEX = re.compile(LOWERCAMELCASE+r'$')
+PYTEST_METHODS = (r'(setup_module)|(teardown_module)|(setup_class)|'
+                  r'(teardown_class)|(setup_method)|(teardown_method)|'
+                  r'(setup_function)|(teardown_function)')
+METHODS_REGEX = re.compile(PYTEST_METHODS + r'|(((test_)|_)?[a-z]+[0-9a-z]*'+WORDCASE+r'*)$')
 SPECIAL_METHOD_REGEX = re.compile(r'__[a-z]+__$')
 
 # variable, argument
-LOWERCAMELCASE_REGEX = re.compile(LOWERCAMELCASE+r'$')
+VARIABLE_REGEX = re.compile(r'_?([a-z0-9]+_?)*[a-z0-9]+$')
 
 # constant
-CONSTANT_REGEX = re.compile(r'[_A-Z]([A-Z0-9]+_?)*[A-Z0-9]+$')
+CONSTANT_REGEX = re.compile(r'_?([A-Z0-9]+_?)*[A-Z0-9]+$')
 
 # class
 CLASS_REGEX = re.compile(r'_?'+WORDCASE+'+$')
@@ -214,7 +216,7 @@ class FunctionArgNamesCheck(BaseASTCheck):
     A classmethod should have 'cls' as first argument.
     A method should have 'self' as first argument.
     """
-    check = LOWERCAMELCASE_REGEX.match
+    check = VARIABLE_REGEX.match
     N803 = "argument name should be lowerCamelCase"
     N804 = "first argument of a classmethod should be named 'cls'"
     N805 = "first argument of a method should be named 'self'"
@@ -259,12 +261,13 @@ class ImportAsCheck(BaseASTCheck):
     """
 
     check_const = CONSTANT_REGEX.match
-    check_var = LOWERCAMELCASE_REGEX.match
+    check_var = VARIABLE_REGEX.match
     check_meth = METHODS_REGEX.match
     check_class = CLASS_REGEX.match
 
     N811 = "CONSTANT_CASE imported as non CONSTANT_CASE"
-    N812 = "lowerCamelCase imported as non lowerCamelCase"
+    N812 = ("lower_case_with_underscore imported as non "
+            "lower_case_with_underscore")
     N813 = "lowerCamelCase imported as non lowerCamelCasen"
     N814 = "Upper camel case imported as non upper camel case"
 
@@ -291,8 +294,8 @@ class VariablesInFunctionCheck(BaseASTCheck):
     """
     Local variables in functions should be lowercamelcase
     """
-    check = LOWERCAMELCASE_REGEX.match
-    N806 = "variable in function should be lowerCamelCase"
+    check = VARIABLE_REGEX.match
+    N806 = "variable in function should be lower case with underscore"
 
     def visit_assign(self, node, parents, ignore=None):
         for parent_func in reversed(parents):

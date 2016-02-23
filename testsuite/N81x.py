@@ -10,5 +10,5 @@ from mod import good as Bad
 from mod import CamelCase as noncamle
 #: N814
 from mod import CamelCase as CONSTANT
-#: N812
+#: N813
 from mod import camelCase as CamelCase
